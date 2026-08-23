@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0D2137">
+<title>English For All DZ — Kiosque</title>
+
+<!-- PWA manifest embarqué (installable sans fichier séparé) -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"English For All DZ","short_name":"EFA DZ","start_url":".","display":"standalone","background_color":"%230D2137","theme_color":"%230D2137","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 rx=%2796%27 fill=%27%230D2137%27/%3E%3Ctext x=%27256%27 y=%27340%27 font-size=%27300%27 text-anchor=%27middle%27 fill=%27%23FFC000%27 font-family=%27Arial%27 font-weight=%27bold%27%3EE%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml"}]}'>
+
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     ZONE A — COULEURS DE MARQUE (modifiable sans risque)
+     Change juste les codes #XXXXXX ci-dessous, rien d'autre à toucher.
+     ============================================================ */
+  :root{
+    --vert:#006233;
+    --or:#FFC000;
+    --navy:#0D2137;
+    --navy-soft:#16304d;
+    --blanc:#ffffff;
+    --cream:#fbf9f4;
+    --ink:#0D2137;
+    --muted:#8a93a3;
+    --shelf-gap:18px;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  button,.card,.tab,.code-chip,.lang-btn{touch-action:manipulation;cursor:pointer;}
+  html,body{background:var(--cream);color:var(--ink);font-family:'Nunito',sans-serif;}
+  body{padding-bottom:90px;}
+  img{display:block;max-width:100%;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  html[dir="rtl"] body{font-family:'Cairo',sans-serif;}
+  html[dir="rtl"] .brand-txt b,
+  html[dir="rtl"] .hero h1,
+  html[dir="rtl"] .shelf-head h2,
+  html[dir="rtl"] .card .meta .t,
+  html[dir="rtl"] .cover .cover-title,
+  html[dir="rtl"] .sheet h3,
+  html[dir="rtl"] .btn{font-family:'Cairo',sans-serif;}
+
+  /* ---------- Barre du haut ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    background:var(--navy);
+    padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+    display:flex;align-items:center;gap:12px;
+    box-shadow:0 2px 14px rgba(13,33,55,.18);
+  }
+  .logo-badge{
+    width:42px;height:42px;border-radius:12px;flex:none;
+    background:linear-gradient(135deg,var(--vert),#00834a);
+    display:grid;place-items:center;
+    border:2px solid var(--or);
+  }
+  .logo-badge span{font-family:'Baloo 2';font-weight:800;color:var(--or);font-size:24px;line-height:1;}
+  .brand-txt{line-height:1.1;}
+  .brand-txt b{font-family:'Baloo 2';font-weight:800;color:var(--blanc);font-size:17px;display:block;letter-spacing:.2px;}
+  .brand-txt small{color:var(--or);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+  .code-chip{
+    margin-left:auto;display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,192,0,.4);
+    color:var(--blanc);font-weight:700;font-size:12px;
+    padding:10px 13px;border-radius:999px;min-height:38px;
+  }
+  html[dir="rtl"] .code-chip{margin-left:0;margin-right:auto;}
+  .code-chip.on{background:var(--or);color:var(--navy);border-color:var(--or);}
+  .code-chip svg{width:14px;height:14px;}
+
+  /* ---------- Sélecteur de langue ---------- */
+  .langbar{
+    display:flex;gap:8px;padding:12px 18px 0;background:var(--cream);
+  }
+  .lang-btn{
+    flex:1;padding:9px 6px;border-radius:12px;font-weight:800;font-size:13px;
+    background:var(--blanc);color:var(--muted);border:2px solid #eee;
+    min-height:38px;
+  }
+  .lang-btn.active{background:var(--navy);color:var(--or);border-color:var(--navy);}
+
+  /* ---------- Héros ---------- */
+  .hero{
+    margin:16px 18px 4px;padding:22px 20px;border-radius:22px;
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgba(255,192,0,.18), transparent 55%),
+      linear-gradient(135deg,var(--vert),#004f29);
+    color:var(--blanc);position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-30px;bottom:-40px;
+    width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,192,0,.25),transparent 70%);
+  }
+  .hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--or);}
+  .hero h1{font-family:'Baloo 2';font-weight:800;font-size:26px;line-height:1.15;margin:6px 0 8px;max-width:15ch;}
+  .hero p{font-size:14px;opacity:.92;max-width:34ch;font-weight:600;}
+  .hero .flags{position:absolute;top:16px;right:18px;font-size:20px;letter-spacing:2px;}
+  html[dir="rtl"] .hero .flags{right:auto;left:18px;}
+  html[dir="rtl"] .hero::after{right:auto;left:-30px;}
+
+  /* ---------- Étagères ---------- */
+  .shelf{margin:26px 0 4px;}
+  .shelf-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding:0 18px 12px;
+  }
+  .shelf-head h2{font-family:'Baloo 2';font-weight:700;font-size:19px;color:var(--navy);}
+  .shelf-head .count{font-size:12px;font-weight:700;color:var(--muted);}
+
+  .rail{
+    display:flex;gap:var(--shelf-gap);overflow-x:auto;
+    padding:2px 18px 8px;scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+  }
+  .rail::-webkit-scrollbar{display:none;}
+
+  .card{
+    flex:0 0 auto;width:158px;scroll-snap-align:start;
+    background:var(--blanc);border-radius:var(--radius);
+    box-shadow:0 4px 16px rgba(13,33,55,.10);
+    overflow:hidden;transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:active{transform:scale(.97);}
+  .card .cover{
+    height:200px;position:relative;display:grid;place-items:center;
+    color:var(--blanc);text-align:center;padding:14px;
+  }
+  .cover-aj{background:linear-gradient(160deg,#00834a,#004f29);}
+  .cover-ai{background:linear-gradient(160deg,#e07a3e,#b4491f);}
+  .cover-vid{background:linear-gradient(160deg,var(--navy-soft),var(--navy));}
+  .cover .kicker{
+    position:absolute;top:10px;left:10px;
+    background:var(--or);color:var(--navy);font-size:10px;font-weight:800;
+    padding:4px 9px;border-radius:999px;letter-spacing:.4px;text-transform:uppercase;
+  }
+  html[dir="rtl"] .cover .kicker{left:auto;right:10px;}
+  .cover .emoji{font-size:52px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25));}
+  .cover .cover-title{font-family:'Baloo 2';font-weight:800;font-size:16px;margin-top:8px;line-height:1.1;text-shadow:0 2px 6px rgba(0,0,0,.3);}
+  .card .meta{padding:11px 13px 14px;}
+  .card .meta .t{font-family:'Baloo 2';font-weight:700;font-size:14px;color:var(--navy);line-height:1.15;}
+  .card .meta .s{font-size:12px;color:var(--muted);font-weight:700;margin-top:3px;}
+  .progress{margin-top:9px;height:6px;border-radius:999px;background:#eee;overflow:hidden;}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--vert),var(--or));border-radius:999px;}
+  .free-tag{display:inline-block;margin-top:9px;background:rgba(0,98,51,.12);color:var(--vert);font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;}
+
+  /* Carte "vidéo" plus large façon vitrine */
+  .card.wide{width:230px;}
+  .card.wide .cover{height:130px;}
+  .card.wide .cover .emoji{font-size:40px;}
+
+  /* ---------- Barre de navigation basse ---------- */
+  .tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--blanc);
+    border-top:1px solid #eee;
+    display:flex;justify-content:space-around;
+    padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
+    box-shadow:0 -4px 20px rgba(13,33,55,.06);
+  }
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:11px;font-weight:800;padding:6px 14px;border-radius:12px;min-height:44px;justify-content:center;}
+  .tab svg{width:23px;height:23px;}
+  .tab.active{color:var(--vert);}
+  .tab.active svg{stroke:var(--vert);}
+
+  /* ---------- Modale code ---------- */
+  .sheet-backdrop{
+    position:fixed;inset:0;background:rgba(13,33,55,.55);z-index:60;
+    display:none;align-items:flex-end;
+  }
+  .sheet-backdrop.show{display:flex;}
+  .sheet{
+    background:var(--blanc);width:100%;border-radius:24px 24px 0 0;
+    padding:24px 22px calc(env(safe-area-inset-bottom) + 24px);
+    animation:up .25s ease;
+  }
+  @keyframes up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .sheet h3{font-family:'Baloo 2';font-weight:800;font-size:20px;color:var(--navy);}
+  .sheet p{font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 18px;}
+  .sheet input{
+    width:100%;padding:15px 16px;font-size:16px;font-weight:700;font-family:'Baloo 2';
+    letter-spacing:1px;text-transform:uppercase;
+    border:2px solid #e6e6e6;border-radius:14px;color:var(--navy);
+  }
+  .sheet input:focus{outline:none;border-color:var(--or);}
+  .sheet .btn{
+    width:100%;margin-top:14px;padding:16px;border-radius:14px;
+    font-family:'Baloo 2';font-weight:800;font-size:16px;min-height:52px;
+    background:var(--vert);color:var(--blanc);
+  }
+  .sheet .btn.ghost{background:transparent;color:var(--muted);font-size:14px;margin-top:4px;}
+  .sheet .telegram-help{
+    display:block;margin:10px auto 0;text-align:center;color:var(--navy);
+    font-size:13px;font-weight:700;line-height:1.35;
+  }
+  .sheet .telegram-help span{display:block;color:var(--muted);font-size:11px;font-weight:600;margin-top:2px;}
+  .sheet .telegram-help .channels{display:flex;justify-content:center;gap:10px;margin-top:8px;}
+  .sheet .telegram-help .channels a{color:var(--vert);font-weight:800;text-decoration:none;font-size:13px;}
+  .sheet .telegram-help .channels a:hover{text-decoration:underline;}
+  .sheet .telegram-help .channels .sep{color:var(--muted);}
+  .sheet .err{color:#c0392b;font-size:13px;font-weight:700;margin-top:10px;min-height:18px;}
+
+  /* Bannière d'installation */
+  .install-banner{
+    display:none;margin:16px 18px 0;padding:14px 16px;border-radius:16px;
+    background:var(--navy);color:var(--blanc);align-items:center;gap:12px;
+  }
+  .install-banner.show{display:flex;}
+  .install-banner .txt{font-size:13px;font-weight:700;line-height:1.3;flex:1;}
+  .install-banner .txt b{color:var(--or);}
+  .install-banner button{background:var(--or);color:var(--navy);font-family:'Baloo 2';font-weight:800;padding:10px 14px;border-radius:10px;font-size:13px;min-height:40px;}
+  .install-banner .x{background:none;color:rgba(255,255,255,.6);font-size:20px;padding:0 8px;min-height:40px;}
+
+  /* ---------- Démo prononciation (Web Speech API) ---------- */
+  .vocab-rail{
+    display:flex;gap:12px;overflow-x:auto;padding:2px 18px 8px;
+    scroll-snap-type:x mandatory;scrollbar-width:none;
+  }
+  .vocab-rail::-webkit-scrollbar{display:none;}
+  .vocab-card{
+    flex:0 0 auto;width:150px;scroll-snap-align:start;
+    background:var(--blanc);border-radius:16px;padding:16px 14px;
+    box-shadow:0 4px 16px rgba(13,33,55,.10);text-align:center;
+  }
+  .vocab-card .word{font-family:'Baloo 2';font-weight:800;font-size:16px;color:var(--navy);margin-bottom:2px;}
+  .vocab-card .tr{font-size:11px;color:var(--muted);font-weight:700;min-height:14px;}
+  .listen-btn{
+    margin-top:10px;width:100%;padding:10px;border-radius:12px;min-height:40px;
+    background:linear-gradient(135deg,var(--vert),#00834a);color:var(--blanc);
+    font-family:'Baloo 2';font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .listen-btn.playing{background:var(--or);color:var(--navy);}
+  .listen-btn svg{width:15px;height:15px;flex:none;}
+  .vocab-note{font-size:11px;color:var(--muted);padding:0 18px;margin-top:-6px;margin-bottom:4px;font-weight:600;}
+
+  @media(min-width:640px){
+    .card{width:180px;}
+    .hero h1{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+
+  <noscript>
+    <div style="position:fixed;inset:0;z-index:9999;background:#0D2137;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;font-family:'Baloo 2','Nunito',sans-serif;">
+      <div style="font-size:44px;margin-bottom:14px;">⚠️</div>
+      <div style="font-size:19px;font-weight:800;margin-bottom:14px;">Ouvre ce fichier dans Safari</div>
+      <div style="font-size:14px;font-weight:600;max-width:300px;line-height:1.6;margin-bottom:18px;">
+        Tu es dans un aperçu limité (Fichiers, WhatsApp, Telegram...) qui ne peut pas faire fonctionner cette page.
+      </div>
+      <div style="background:rgba(255,192,0,.15);border:1px solid #FFC000;border-radius:14px;padding:14px 18px;font-size:13px;font-weight:700;max-width:300px;">
+        Appuie sur <span style="color:#FFC000;">•••</span> en haut à droite<br>puis choisis <span style="color:#FFC000;">« Ouvrir dans Safari »</span>
+      </div>
+      <div style="font-size:12px;font-weight:600;opacity:.6;margin-top:20px;">
+        English: open this file in Safari · افتح هذا الملف في Safari
+      </div>
+    </div>
+  </noscript>
+
+  <!-- Barre du haut -->
+  <header class="topbar">
+    <div class="logo-badge"><span>E</span></div>
+    <div class="brand-txt">
+      <b>English For All DZ</b>
+      <small>Learn · Apprendre · تعلّم</small>
+    </div>
+    <button type="button" class="code-chip" id="codeChip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span id="codeChipTxt">Mon code</span>
+    </button>
+  </header>
+
+  <!-- Sélecteur de langue -->
+  <div class="langbar">
+    <button type="button" class="lang-btn" data-lang="fr">Français</button>
+    <button type="button" class="lang-btn" data-lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="ar">العربية</button>
+  </div>
+
+  <!-- Bannière installation PWA -->
+  <div class="install-banner" id="installBanner">
+    <div class="txt" id="installTxt">Installe <b>EFA DZ</b> sur ton écran d'accueil — comme une vraie app.</div>
+    <button type="button" id="installBtn">Installer</button>
+    <button type="button" class="x" id="installClose">×</button>
+  </div>
+
+  <!-- Héros -->
+  <section class="hero">
+    <div class="flags">🇩🇿</div>
+    <div class="eyebrow" id="heroEyebrow">Gratuit · مجاني · Free</div>
+    <h1 id="heroTitle">Apprends l'anglais avec Nassim & Aïcha</h1>
+    <p id="heroText">Des livres interactifs et des vidéos, sur ton téléphone, ta tablette ou ta TV.</p>
+  </section>
+
+  <!-- Étagère 1 : Livres interactifs -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2 id="shelfBooksTitle">📚 Livres interactifs</h2>
+      <span class="count" id="booksCount"></span>
+    </div>
+    <div class="rail" id="railBooks"></div>
+  </section>
+
+  <!-- Étagère 2 : Vidéos & Reels (vitrine) -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2 id="shelfVideosTitle">🎬 Vidéos & Reels</h2>
+      <span class="count" id="videosLabel">Vitrine gratuite</span>
+    </div>
+    <div class="rail" id="railVideos"></div>
+  </section>
+
+  <!-- Démo : bouton Listen (Web Speech API, aucun fichier audio) -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2 id="vocabTitle">🔊 Écoute — Leçon 1</h2>
+      <span class="count" id="vocabCount"></span>
+    </div>
+    <div class="vocab-note" id="vocabNote">Appuie sur un mot pour l'entendre.</div>
+    <div class="vocab-rail" id="railVocab"></div>
+  </section>
+
+  <!-- Barre de navigation basse -->
+  <nav class="tabbar">
+    <button type="button" class="tab active" id="tabHome"><svg viewBox="0 0 24 24" fill="none" stroke="#006233" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span id="tabHomeTxt">Accueil</span></button>
+    <button type="button" class="tab" id="tabLibrary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v16H4z"/><path d="M13 4h7v16h-7z"/></svg><span id="tabLibraryTxt">Ma biblio</span></button>
+    <button type="button" class="tab" id="tabAccount"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span id="tabAccountTxt">Mon compte</span></button>
+  </nav>
+
+  <!-- Modale : entrer le code -->
+  <div class="sheet-backdrop" id="sheetBackdrop">
+    <div class="sheet">
+      <!-- Étape 1 : saisie du code -->
+      <div id="codeStep">
+        <h3 id="sheetTitle">Entre ton code</h3>
+        <p id="sheetDesc">Ton code EFA te suit d'un appareil à l'autre et garde ta progression.</p>
+        <input id="codeInput" placeholder="EFA-XXXXXX" maxlength="10" autocomplete="off">
+        <div class="err" id="codeErr"></div>
+        <button type="button" class="btn" id="btnValidate">Valider mon code</button>
+        <button type="button" class="btn ghost" id="btnLater">Plus tard</button>
+        <div class="telegram-help" id="codeHelp">
+          Pas encore de code ? Demande le tien
+          <span>No code yet? · ليس لديك رمز؟</span>
+          <span class="channels">
+            <a href="https://t.me/EnglishForAllDZ_contact" target="_blank" rel="noopener">Telegram</a>
+            <span class="sep" aria-hidden="true">·</span>
+            <a href="https://wa.me/213798462780" target="_blank" rel="noopener">WhatsApp</a>
+          </span>
+        </div>
+      </div>
+      <!-- Étape 2 : demande du prénom (uniquement si le compte n'en a pas encore) -->
+      <div id="nameStep" style="display:none">
+        <h3 id="nameStepTitle">Comment tu t'appelles ?</h3>
+        <p id="nameStepDesc">Ton prénom sera affiché la prochaine fois que tu reviens.</p>
+        <input id="nameInput" placeholder="Ton prénom" maxlength="30" autocomplete="off">
+        <div class="err" id="nameErr"></div>
+        <button type="button" class="btn" id="btnValidateName">Continuer</button>
+      </div>
+    </div>
+  </div>
+
+<!-- SDK Firebase (config publique du projet englishforall-dz, sans risque à exposer) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAeOUTJm5brnuUKYyvw4l_QHMt0Sg5U-NI",
+    authDomain: "englishforall-dz.firebaseapp.com",
+    projectId: "englishforall-dz",
+    storageBucket: "englishforall-dz.firebasestorage.app",
+    messagingSenderId: "353912211161",
+    appId: "1:353912211161:web:58169caedeea844cc0e0c8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+/* =========================================================
+   BRIQUE 2 — CÂBLAGE FIRESTORE RÉEL
+   Le code EFA est vérifié contre Firestore (plus une simple
+   vérification de format). La progression sera câblée à une
+   étape suivante, une fois les écrans de leçon connectés.
+   Trilingue FR / EN / AR (avec RTL pour l'arabe).
+   ========================================================= */
+
+/* ============================================================
+   ZONE B — TEXTES, LIVRES ET VIDÉOS (modifiable sans risque)
+   Tout ce que tu vois à l'écran (titres, descriptions, livres,
+   vidéos) est ici. Il y a 3 blocs : fr, en, ar — pense à modifier
+   les 3 si tu changes un contenu (pas juste la langue par défaut).
+   ============================================================ */
+const I18N = {
+  fr: {
+    dir:'ltr',
+    heroEyebrow:'Gratuit · مجاني · Free',
+    heroTitle:"Apprends l'anglais avec Nassim & Aïcha",
+    heroText:"Des livres interactifs et des vidéos, sur ton téléphone, ta tablette ou ta TV.",
+    shelfBooksTitle:'📚 Livres interactifs',
+    booksSuffix:'titres',
+    shelfVideosTitle:'🎬 Vidéos & Reels',
+    videosLabel:'Vitrine gratuite',
+    vocabTitle:'🔊 Écoute — Leçon 1',
+    vocabCount:'mots',
+    vocabNote:"Appuie sur un mot pour l'entendre.",
+    listenLabel:'Écouter', speechLang:'en-US',
+    vocab:[
+      { word:'Hello', tr:'Bonjour' },
+      { word:'Good morning', tr:'Bonjour (matin)' },
+      { word:'Thank you', tr:'Merci' },
+      { word:'Goodbye', tr:'Au revoir' },
+    ],
+    tabHome:'Accueil', tabLibrary:'Ma biblio', tabAccount:'Mon compte',
+    codeChipDefault:'Mon code',
+    sheetTitle:'Entre ton code',
+    sheetDesc:"Ton code EFA te suit d'un appareil à l'autre et garde ta progression.",
+    btnValidate:'Valider mon code', btnLater:'Plus tard',
+    errFormat:'Format attendu : EFA-XXXXXX',
+    freeTag:'Gratuit', watchTag:'▶ Regarder',
+    installTxt:"Installe <b>EFA DZ</b> sur ton écran d'accueil — comme une vraie app.",
+    installBtn:'Installer',
+    alertLibrary:'Bientôt : ta bibliothèque personnelle 📚',
+    openBook:(t)=>`« ${t} » s'ouvrira ici.\n\n(Le livre interactif sera relié à cet écran à l'étape suivante.)`,
+    openVideo:(t)=>`Bientôt : lecture intégrée de « ${t} » 🎬`,
+    books:[
+      { id:'aj1',  kicker:'Nouveau', emoji:'📖', img:'aj1-cover.jpg', url:'livres/algerian-juniors-1/lecon-1.html', title:'Algerian Juniors 1', sub:'7 leçons · A1', cover:'cover-aj', progress:0.13, free:true },
+      { id:'aea1', kicker:'Série',   emoji:'🗺️', img:'aea1-cover.png', title:"Aïcha Explore Algeria", sub:'Tome 1 · 10 villes', cover:'cover-ai', progress:0, free:true },
+      { id:'aea2', kicker:'Bientôt', emoji:'🐪', img:'aea2-cover.png', title:"Aïcha — Tome 2", sub:'Sud & Sahara', cover:'cover-ai', progress:0, free:true },
+    ],
+    videos:[
+      { emoji:'👋', title:'Leçon 1 — Greetings', sub:'Reel · 45s', cover:'cover-vid' },
+      { emoji:'🔢', title:'Numbers 1–10',        sub:'Reel · 38s', cover:'cover-vid' },
+      { emoji:'🎨', title:'Colors',              sub:'Reel · 41s', cover:'cover-vid' },
+      { emoji:'📺', title:'Chaîne YouTube',      sub:'Toutes les vidéos', cover:'cover-vid' },
+    ]
+  },
+  en: {
+    dir:'ltr',
+    heroEyebrow:'Free · مجاني · Gratuit',
+    heroTitle:"Learn English with Nassim & Aïcha",
+    heroText:"Interactive books and videos, on your phone, tablet or TV.",
+    shelfBooksTitle:'📚 Interactive books',
+    booksSuffix:'titles',
+    shelfVideosTitle:'🎬 Videos & Reels',
+    videosLabel:'Free showcase',
+    vocabTitle:'🔊 Listen — Lesson 1',
+    vocabCount:'words',
+    vocabNote:"Tap a word to hear it.",
+    listenLabel:'Listen', speechLang:'en-US',
+    vocab:[
+      { word:'Hello', tr:'Hello' },
+      { word:'Good morning', tr:'Good morning' },
+      { word:'Thank you', tr:'Thank you' },
+      { word:'Goodbye', tr:'Goodbye' },
+    ],
+    tabHome:'Home', tabLibrary:'My library', tabAccount:'My account',
+    codeChipDefault:'My code',
+    sheetTitle:'Enter your code',
+    sheetDesc:"Your EFA code follows you across devices and saves your progress.",
+    btnValidate:'Confirm my code', btnLater:'Later',
+    errFormat:'Expected format: EFA-XXXXXX',
+    freeTag:'Free', watchTag:'▶ Watch',
+    installTxt:"Install <b>EFA DZ</b> on your home screen — like a real app.",
+    installBtn:'Install',
+    alertLibrary:'Coming soon: your personal library 📚',
+    openBook:(t)=>`"${t}" will open here.\n\n(This interactive book will be connected at the next step.)`,
+    openVideo:(t)=>`Coming soon: watch "${t}" 🎬`,
+    books:[
+      { id:'aj1',  kicker:'New',    emoji:'📖', img:'aj1-cover.jpg', url:'livres/algerian-juniors-1/lecon-1.html', title:'Algerian Juniors 1', sub:'7 lessons · A1', cover:'cover-aj', progress:0.13, free:true },
+      { id:'aea1', kicker:'Series', emoji:'🗺️', img:'aea1-cover.png', title:"Aïcha Explore Algeria", sub:'Book 1 · 10 cities', cover:'cover-ai', progress:0, free:true },
+      { id:'aea2', kicker:'Coming soon', emoji:'🐪', img:'aea2-cover.png', title:"Aïcha — Book 2", sub:'South & Sahara', cover:'cover-ai', progress:0, free:true },
+    ],
+    videos:[
+      { emoji:'👋', title:'Lesson 1 — Greetings', sub:'Reel · 45s', cover:'cover-vid' },
+      { emoji:'🔢', title:'Numbers 1–10',         sub:'Reel · 38s', cover:'cover-vid' },
+      { emoji:'🎨', title:'Colors',               sub:'Reel · 41s', cover:'cover-vid' },
+      { emoji:'📺', title:'YouTube channel',      sub:'All videos', cover:'cover-vid' },
+    ]
+  },
+  ar: {
+    dir:'rtl',
+    heroEyebrow:'مجاني · Gratuit · Free',
+    heroTitle:"تعلّم الإنجليزية مع نسيم وعائشة",
+    heroText:"كتب تفاعلية وفيديوهات، على هاتفك أو لوحك أو تلفازك.",
+    shelfBooksTitle:'📚 كتب تفاعلية',
+    booksSuffix:'عنوان',
+    shelfVideosTitle:'🎬 فيديوهات وريلز',
+    videosLabel:'عرض مجاني',
+    vocabTitle:'🔊 استمع — الدرس 1',
+    vocabCount:'كلمات',
+    vocabNote:"اضغط على كلمة لسماعها.",
+    listenLabel:'استمع', speechLang:'en-US',
+    vocab:[
+      { word:'Hello', tr:'مرحبا' },
+      { word:'Good morning', tr:'صباح الخير' },
+      { word:'Thank you', tr:'شكرًا' },
+      { word:'Goodbye', tr:'مع السلامة' },
+    ],
+    tabHome:'الرئيسية', tabLibrary:'مكتبتي', tabAccount:'حسابي',
+    codeChipDefault:'رمزي',
+    sheetTitle:'أدخل رمزك',
+    sheetDesc:"رمز EFA يتابعك من جهاز إلى آخر ويحفظ تقدّمك.",
+    btnValidate:'تأكيد الرمز', btnLater:'لاحقًا',
+    errFormat:'الصيغة المطلوبة: EFA-XXXXXX',
+    freeTag:'مجاني', watchTag:'▶ مشاهدة',
+    installTxt:"ثبّت <b>EFA DZ</b> على شاشتك الرئيسية — كتطبيق حقيقي.",
+    installBtn:'تثبيت',
+    alertLibrary:'قريبًا: مكتبتك الشخصية 📚',
+    openBook:(t)=>`سيُفتح "${t}" هنا.\n\n(سيتم ربط هذا الكتاب التفاعلي في الخطوة التالية.)`,
+    openVideo:(t)=>`قريبًا: مشاهدة "${t}" 🎬`,
+    books:[
+      { id:'aj1',  kicker:'جديد',   emoji:'📖', img:'aj1-cover.jpg', url:'livres/algerian-juniors-1/lecon-1.html', title:'Algerian Juniors 1', sub:'7 دروس · A1', cover:'cover-aj', progress:0.13, free:true },
+      { id:'aea1', kicker:'سلسلة',  emoji:'🗺️', img:'aea1-cover.png', title:"Aïcha Explore Algeria", sub:'الجزء 1 · 10 مدن', cover:'cover-ai', progress:0, free:true },
+      { id:'aea2', kicker:'قريبًا', emoji:'🐪', img:'aea2-cover.png', title:"Aïcha — الجزء 2", sub:'الجنوب والصحراء', cover:'cover-ai', progress:0, free:true },
+    ],
+    videos:[
+      { emoji:'👋', title:'الدرس 1 — Greetings', sub:'ريلز · 45 ثانية', cover:'cover-vid' },
+      { emoji:'🔢', title:'Numbers 1–10',         sub:'ريلز · 38 ثانية', cover:'cover-vid' },
+      { emoji:'🎨', title:'Colors',                sub:'ريلز · 41 ثانية', cover:'cover-vid' },
+      { emoji:'📺', title:'قناة يوتيوب',           sub:'كل الفيديوهات', cover:'cover-vid' },
+    ]
+  }
+};
+
+let currentLang = localStorage.getItem('efa_lang') || 'fr';
+
+/* --- Rendu des étagères (dépend de la langue) --- */
+function bookCard(b, t){
+  const prog = b.progress > 0
+    ? `<div class="progress"><i style="width:${Math.round(b.progress*100)}%"></i></div>`
+    : (b.free ? `<span class="free-tag">${t.freeTag}</span>` : '');
+  return `
+    <div class="card" data-open-book="${b.id}" data-title="${b.title.replace(/"/g,'&quot;')}" data-url="${b.url||''}">
+      <div class="cover ${b.cover}">
+        <span class="kicker">${b.kicker}</span>
+        <img src="images/${b.img||''}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        <div class="cover-title">${b.title}</div>
+      </div>
+      <div class="meta">
+        <div class="t">${b.title}</div>
+        <div class="s">${b.sub}</div>
+        ${prog}
+      </div>
+    </div>`;
+}
+function videoCard(v, t){
+  return `
+    <div class="card wide" data-open-video="${v.title.replace(/"/g,'&quot;')}">
+      <div class="cover ${v.cover}">
+        <span class="kicker">${t.watchTag}</span>
+        <div class="emoji">${v.emoji}</div>
+      </div>
+      <div class="meta">
+        <div class="t">${v.title}</div>
+        <div class="s">${v.sub}</div>
+      </div>
+    </div>`;
+}
+
+function renderContent(){
+  const t = I18N[currentLang];
+  document.getElementById('railBooks').innerHTML  = t.books.map(b=>bookCard(b,t)).join('');
+  document.getElementById('railVideos').innerHTML = t.videos.map(v=>videoCard(v,t)).join('');
+  document.getElementById('booksCount').textContent = t.books.length + ' ' + t.booksSuffix;
+  document.getElementById('vocabTitle').textContent = t.vocabTitle;
+  document.getElementById('vocabCount').textContent  = t.vocab.length + ' ' + t.vocabCount;
+  document.getElementById('vocabNote').textContent   = t.vocabNote;
+  document.getElementById('railVocab').innerHTML = t.vocab.map((v,i)=>vocabCard(v,i,t)).join('');
+
+  // Re-brancher les taps sur les nouvelles cartes (double sécurité iOS)
+  document.querySelectorAll('[data-open-book]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.dataset.url){ window.location.href = el.dataset.url; }
+      else{ openBook(el.dataset.title); }
+    });
+  });
+  document.querySelectorAll('[data-open-video]').forEach(el=>{
+    el.addEventListener('click', ()=>openVideo(el.dataset.openVideo));
+  });
+  document.querySelectorAll('[data-listen]').forEach(el=>{
+    el.addEventListener('click', ()=>speakWord(el.dataset.listen, el));
+  });
+}
+
+/* --- Carte de vocabulaire avec bouton Listen --- */
+function vocabCard(v, i, t){
+  return `
+    <div class="vocab-card">
+      <div class="word">${v.word}</div>
+      <div class="tr">${v.tr}</div>
+      <button type="button" class="listen-btn" id="listenBtn${i}" data-listen="${v.word.replace(/"/g,'&quot;')}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        ${t.listenLabel}
+      </button>
+    </div>`;
+}
+
+/* --- Web Speech API : le navigateur "parle" le mot, aucun fichier audio --- */
+function speakWord(text, btnEl){
+  if(!('speechSynthesis' in window)){
+    alert("Ton navigateur ne supporte pas la lecture vocale. Essaie avec Chrome ou Safari à jour.");
+    return;
+  }
+  window.speechSynthesis.cancel(); // stoppe toute lecture en cours avant d'en lancer une nouvelle
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = I18N[currentLang].speechLang; // toujours en anglais, quelle que soit la langue de l'interface
+  utter.rate = 0.9; // légèrement ralenti, plus clair pour un apprenant débutant
+
+  document.querySelectorAll('.listen-btn').forEach(b=>b.classList.remove('playing'));
+  if(btnEl) btnEl.classList.add('playing');
+  utter.onend = ()=>{ if(btnEl) btnEl.classList.remove('playing'); };
+
+  window.speechSynthesis.speak(utter);
+}
+
+function applyLang(lang){
+  currentLang = lang;
+  localStorage.setItem('efa_lang', lang);
+  const t = I18N[lang];
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = t.dir;
+
+  document.getElementById('heroEyebrow').textContent = t.heroEyebrow;
+  document.getElementById('heroTitle').textContent    = t.heroTitle;
+  document.getElementById('heroText').textContent     = t.heroText;
+  document.getElementById('shelfBooksTitle').textContent  = t.shelfBooksTitle;
+  document.getElementById('shelfVideosTitle').textContent = t.shelfVideosTitle;
+  document.getElementById('videosLabel').textContent = t.videosLabel;
+  document.getElementById('tabHomeTxt').textContent    = t.tabHome;
+  document.getElementById('tabLibraryTxt').textContent = t.tabLibrary;
+  document.getElementById('tabAccountTxt').textContent = t.tabAccount;
+  document.getElementById('sheetTitle').textContent = t.sheetTitle;
+  document.getElementById('sheetDesc').textContent  = t.sheetDesc;
+  document.getElementById('btnValidate').textContent = t.btnValidate;
+  document.getElementById('btnLater').textContent     = t.btnLater;
+  document.getElementById('codeHelp').innerHTML = 'Pas encore de code ? Demande le tien<span>No code yet? · ليس لديك رمز؟</span><span class="channels"><a href="https://t.me/EnglishForAllDZ_contact" target="_blank" rel="noopener">Telegram</a><span class="sep" aria-hidden="true">·</span><a href="https://wa.me/213798462780" target="_blank" rel="noopener">WhatsApp</a></span>';
+  document.getElementById('installTxt').innerHTML  = t.installTxt;
+  document.getElementById('installBtn').textContent = t.installBtn;
+
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+
+  refreshCodeChip();
+  renderContent();
+}
+
+/* --- Ouverture d'un livre / vidéo (placeholder brique 1) --- */
+function openBook(title){ alert(I18N[currentLang].openBook(title)); }
+function openVideo(title){ alert(I18N[currentLang].openVideo(title)); }
+
+/* --- Gestion du code EFA (vérifié contre Firestore) --- */
+const CODE_KEY = 'efa_code';
+let pendingCode = null; // code en cours de validation, le temps de gérer l'étape "prénom"
+
+function refreshCodeChip(){
+  const code = localStorage.getItem(CODE_KEY);
+  const chip = document.getElementById('codeChip');
+  const txt  = document.getElementById('codeChipTxt');
+  if(code){ chip.classList.add('on'); txt.textContent = code; }
+  else    { chip.classList.remove('on'); txt.textContent = I18N[currentLang].codeChipDefault; }
+}
+
+/* Revalidation silencieuse : si un code est mémorisé sur l'appareil mais que
+   le document a été supprimé côté Firestore, on l'oublie proprement. */
+async function verifyStoredCodeOnLoad(){
+  const code = localStorage.getItem(CODE_KEY);
+  if(!code) return;
+  try{
+    const snap = await getDoc(doc(db, 'learners', code));
+    if(!snap.exists()){
+      localStorage.removeItem(CODE_KEY);
+      refreshCodeChip();
+    }
+  }catch(e){
+    // Pas de réseau ou erreur Firestore : on ne touche pas au code mémorisé,
+    // on retentera silencieusement au prochain chargement.
+    console.warn('Vérification du code au démarrage impossible :', e);
+  }
+}
+
+function openSheet(){
+  const code = localStorage.getItem(CODE_KEY);
+  document.getElementById('codeInput').value = code || '';
+  document.getElementById('codeErr').textContent = '';
+  document.getElementById('codeStep').style.display = '';
+  document.getElementById('nameStep').style.display = 'none';
+  document.getElementById('sheetBackdrop').classList.add('show');
+  setTimeout(()=>document.getElementById('codeInput').focus(),200);
+}
+function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('show'); }
+
+async function saveCode(){
+  const raw = document.getElementById('codeInput').value.trim().toUpperCase();
+  const err = document.getElementById('codeErr');
+  const btn = document.getElementById('btnValidate');
+  err.textContent = '';
+
+  if(!/^EFA-[A-Z0-9]{6}$/.test(raw)){
+    err.textContent = I18N[currentLang].errFormat;
+    return;
+  }
+
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = '...';
+
+  try{
+    const snap = await getDoc(doc(db, 'learners', raw));
+    if(!snap.exists()){
+      err.textContent = "Ce code n'existe pas. Vérifie auprès de ton professeur.";
+      return;
+    }
+
+    localStorage.setItem(CODE_KEY, raw);
+    refreshCodeChip();
+
+    const data = snap.data();
+    if(!data.name){
+      // Le compte existe mais n'a pas encore de prénom : on demande avant de fermer
+      pendingCode = raw;
+      document.getElementById('nameInput').value = '';
+      document.getElementById('nameErr').textContent = '';
+      document.getElementById('codeStep').style.display = 'none';
+      document.getElementById('nameStep').style.display = '';
+      setTimeout(()=>document.getElementById('nameInput').focus(),200);
+    }else{
+      closeSheet();
+    }
+  }catch(e){
+    err.textContent = "Connexion impossible. Vérifie ta connexion internet.";
+    console.warn('Erreur de vérification du code :', e);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+async function saveName(){
+  const raw = document.getElementById('nameInput').value.trim();
+  const err = document.getElementById('nameErr');
+  const btn = document.getElementById('btnValidateName');
+  err.textContent = '';
+
+  if(raw.length < 2){
+    err.textContent = 'Entre au moins 2 lettres.';
+    return;
+  }
+
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = '...';
+
+  try{
+    await updateDoc(doc(db, 'learners', pendingCode), { name: raw });
+    closeSheet();
+  }catch(e){
+    err.textContent = "Connexion impossible. Réessaie.";
+    console.warn('Erreur d\'enregistrement du prénom :', e);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+/* --- Branchement des événements (onclick supprimé du HTML,
+       tout passe par addEventListener pour plus de fiabilité iOS) --- */
+document.getElementById('codeChip').addEventListener('click', openSheet);
+document.getElementById('tabAccount').addEventListener('click', openSheet);
+document.getElementById('tabLibrary').addEventListener('click', ()=>alert(I18N[currentLang].alertLibrary));
+document.getElementById('btnValidate').addEventListener('click', saveCode);
+document.getElementById('btnValidateName').addEventListener('click', saveName);
+document.getElementById('btnLater').addEventListener('click', closeSheet);
+document.getElementById('sheetBackdrop').addEventListener('click', e=>{
+  if(e.target.id==='sheetBackdrop') closeSheet();
+});
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>applyLang(btn.dataset.lang));
+});
+
+/* --- Installation PWA --- */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt=e;
+  if(!sessionStorage.getItem('install_dismissed'))
+    document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', ()=>{
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; hideInstall(); }
+});
+document.getElementById('installClose').addEventListener('click', hideInstall);
+function hideInstall(){ document.getElementById('installBanner').classList.remove('show'); sessionStorage.setItem('install_dismissed','1'); }
+
+/* --- Démarrage --- */
+applyLang(currentLang);
+verifyStoredCodeOnLoad();
+</script>
+</body>
+</html>

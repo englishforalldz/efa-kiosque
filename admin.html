@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — English For All DZ</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0D2137;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  .logo { display:flex; align-items:center; gap:10px; margin-bottom: 24px; }
+  .logo-badge {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #006233; color: #FFC000; font-weight: 800;
+    display:flex; align-items:center; justify-content:center; font-size: 18px;
+  }
+  .logo-text { font-weight: 700; color: #0D2137; font-size: 15px; }
+  .logo-text small { display:block; font-weight:600; color:#8a8a8a; font-size: 11px; }
+  h1 { font-size: 20px; color: #0D2137; margin-bottom: 6px; }
+  p.sub { color: #666; font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+  input, select {
+    width: 100%; padding: 12px 14px; border: 2px solid #e5e5e5; border-radius: 10px;
+    font-size: 15px; margin-bottom: 14px; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: #006233; }
+  button {
+    width: 100%; padding: 13px; border: none; border-radius: 10px;
+    background: #006233; color: #fff; font-weight: 700; font-size: 15px;
+    cursor: pointer; font-family: inherit;
+  }
+  button:disabled { opacity: .6; cursor: default; }
+  button.secondary { background: #FFC000; color: #0D2137; margin-top: 8px; }
+  .err { color: #c0392b; font-size: 13px; margin: -6px 0 14px; min-height: 16px; }
+  .result {
+    margin-top: 20px; padding: 20px; background: #EAF6EE; border: 2px solid #bcd8a0;
+    border-radius: 14px; text-align: center; display: none;
+  }
+  .result.show { display: block; }
+  .result .code {
+    font-size: 28px; font-weight: 800; color: #006233; letter-spacing: 1px;
+    margin: 6px 0 12px; font-family: monospace;
+  }
+  .result button { background: #0D2137; }
+  #gate { text-align: center; }
+  #tool { display: none; }
+  #tool.show { display: block; }
+  .note { font-size: 12px; color: #999; margin-top: 18px; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-badge">E</div>
+      <div class="logo-text">English For All DZ<small>Panneau admin</small></div>
+    </div>
+
+    <div id="gate">
+      <h1>Accès protégé</h1>
+      <p class="sub">Entre le mot de passe admin pour continuer.</p>
+      <input id="pwd" type="password" placeholder="Mot de passe">
+      <div class="err" id="pwdErr"></div>
+      <button id="btnUnlock">Déverrouiller</button>
+    </div>
+
+    <div id="tool">
+      <h1>Générer un nouveau code apprenant</h1>
+      <p class="sub">Crée un compte vide dans Firestore et affiche le code à transmettre à l'apprenant.</p>
+
+      <select id="source">
+        <option value="Telegram">Telegram</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Facebook">Facebook</option>
+        <option value="Bouche à oreille">Bouche à oreille</option>
+        <option value="Autre">Autre</option>
+      </select>
+
+      <button id="btnGenerate">Générer un code</button>
+      <div class="err" id="genErr"></div>
+
+      <div class="result" id="result">
+        <div>Code généré :</div>
+        <div class="code" id="codeOut">EFA-XXXXXX</div>
+        <button id="btnCopy">Copier le code</button>
+      </div>
+
+      <p class="note">
+        Cette page n'est pas protégée par une vraie authentification — seulement par le mot de passe ci-dessus,
+        visible dans le code source par quelqu'un de déterminé. Ne partage jamais son adresse publiquement.
+        Aucune donnée sensible n'est en jeu si quelqu'un crée un compte vide par erreur.
+      </p>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAeOUTJm5brnuUKYyvw4l_QHMt0Sg5U-NI",
+    authDomain: "englishforall-dz.firebaseapp.com",
+    projectId: "englishforall-dz",
+    storageBucket: "englishforall-dz.firebasestorage.app",
+    messagingSenderId: "353912211161",
+    appId: "1:353912211161:web:58169caedeea844cc0e0c8"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  /* ⚠️ Change ce mot de passe pour le tien avant de partager le lien de cette page à qui que ce soit */
+  const ADMIN_PASSWORD = "Mohamed1969";
+
+  const gate = document.getElementById('gate');
+  const tool = document.getElementById('tool');
+  const pwdInput = document.getElementById('pwd');
+  const pwdErr = document.getElementById('pwdErr');
+
+  function unlock(){
+    if(pwdInput.value === ADMIN_PASSWORD){
+      gate.style.display = 'none';
+      tool.classList.add('show');
+      sessionStorage.setItem('efa_admin_unlocked', '1');
+    }else{
+      pwdErr.textContent = 'Mot de passe incorrect.';
+    }
+  }
+  document.getElementById('btnUnlock').addEventListener('click', unlock);
+  pwdInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlock(); });
+
+  if(sessionStorage.getItem('efa_admin_unlocked') === '1'){
+    gate.style.display = 'none';
+    tool.classList.add('show');
+  }
+
+  function randomCode(){
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let s = '';
+    for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    return 'EFA-' + s;
+  }
+
+  async function generateUniqueCode(){
+    for(let attempt=0; attempt<8; attempt++){
+      const code = randomCode();
+      const snap = await getDoc(doc(db,'learners',code));
+      if(!snap.exists()) return code;
+    }
+    throw new Error('Impossible de générer un code unique après plusieurs essais.');
+  }
+
+  const btnGenerate = document.getElementById('btnGenerate');
+  const genErr = document.getElementById('genErr');
+  const result = document.getElementById('result');
+  const codeOut = document.getElementById('codeOut');
+
+  btnGenerate.addEventListener('click', async ()=>{
+    genErr.textContent = '';
+    btnGenerate.disabled = true;
+    const originalLabel = btnGenerate.textContent;
+    btnGenerate.textContent = 'Génération...';
+    try{
+      const code = await generateUniqueCode();
+      const source = document.getElementById('source').value;
+      await setDoc(doc(db,'learners',code), {
+        code: code,
+        createdAt: Date.now(),
+        source: source,
+        currentLesson: 1
+      });
+      codeOut.textContent = code;
+      result.classList.add('show');
+    }catch(e){
+      genErr.textContent = "Erreur : impossible de créer le code. Vérifie ta connexion internet.";
+      console.warn(e);
+    }finally{
+      btnGenerate.disabled = false;
+      btnGenerate.textContent = originalLabel;
+    }
+  });
+
+  document.getElementById('btnCopy').addEventListener('click', ()=>{
+    navigator.clipboard.writeText(codeOut.textContent);
+    const btn = document.getElementById('btnCopy');
+    const original = btn.textContent;
+    btn.textContent = 'Copié !';
+    setTimeout(()=>{ btn.textContent = original; }, 1500);
+  });
+</script>
+</body>
+</html>
